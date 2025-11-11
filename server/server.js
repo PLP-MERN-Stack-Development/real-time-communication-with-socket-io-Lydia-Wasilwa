@@ -55,6 +55,7 @@ io.on('connection', (socket) => {
     
     messages.push(message);
     
+    
     // Limit stored messages to prevent memory issues
     if (messages.length > 100) {
       messages.shift();
@@ -93,6 +94,93 @@ io.on('connection', (socket) => {
     socket.emit('private_message', messageData);
   });
 
+// Store rooms: roomName -> [socketIds]
+const rooms = {};
+const typingUsersRoom = {}; // roomName -> [usernames]
+
+// Join a room
+socket.on("join_room", (roomName) => {
+  socket.join(roomName);
+
+  if (!rooms[roomName]) rooms[roomName] = [];
+  if (!rooms[roomName].includes(socket.id)) rooms[roomName].push(socket.id);
+
+  if (!typingUsersRoom[roomName]) typingUsersRoom[roomName] = [];
+
+  io.to(roomName).emit("room_message", {
+    senderName: "System",
+    text: `${users[socket.id]?.username || "Someone"} joined ${roomName}`,
+  });
+});
+
+// Send a message to a room
+socket.on("send_room_message", ({ roomName, text }) => {
+  const messageData = {
+    senderName: users[socket.id]?.username || "Anonymous",
+    senderId: socket.id,
+    text,
+    timestamp: new Date().toISOString(),
+  };
+  io.to(roomName).emit("room_message", messageData);
+});
+
+// Typing in a room
+socket.on("typing_room", ({ roomName, isTyping }) => {
+  if (!users[socket.id]) return;
+  const username = users[socket.id].username;
+
+  if (!typingUsersRoom[roomName]) typingUsersRoom[roomName] = [];
+
+  if (isTyping) {
+    if (!typingUsersRoom[roomName].includes(username))
+      typingUsersRoom[roomName].push(username);
+  } else {
+    typingUsersRoom[roomName] = typingUsersRoom[roomName].filter((u) => u !== username);
+  }
+
+  io.to(roomName).emit("typing_users_room", typingUsersRoom[roomName]);
+});
+
+// --- File/Image sharing ---
+socket.on("send_file", ({ roomName, file }) => {
+  const messageData = {
+    id: Date.now(),
+    senderName: users[socket.id]?.username || "Anonymous",
+    senderId: socket.id,
+    file, // store file object
+    timestamp: new Date().toISOString(),
+  };
+
+  if (roomName) {
+    io.to(roomName).emit("room_message", messageData);
+  } else {
+    io.emit("receive_message", messageData);
+  }
+
+  // Store in global messages array
+  messages.push(messageData);
+  if (messages.length > 100) messages.shift();
+});
+// --- New: Reactions and Read Receipts ---
+socket.on("add_reaction", ({ messageId, reaction, userName }) => {
+  const message = messages.find((m) => m.id === messageId);
+  if (message) {
+    if (!message.reactions) message.reactions = [];
+    message.reactions.push({ reaction, userName });
+    io.emit("update_message", message);
+  }
+});
+
+socket.on("mark_read", ({ messageId, userName }) => {
+  const message = messages.find((m) => m.id === messageId);
+  if (message) {
+    if (!message.readBy) message.readBy = [];
+    if (!message.readBy.includes(userName)) message.readBy.push(userName);
+    io.emit("update_message", message);
+  }
+});
+
+
   // Handle disconnection
   socket.on('disconnect', () => {
     if (users[socket.id]) {
@@ -130,3 +218,5 @@ server.listen(PORT, () => {
 });
 
 module.exports = { app, server, io }; 
+
+

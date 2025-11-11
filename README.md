@@ -1,15 +1,6 @@
 # Real-Time Chat Application with Socket.io
 
-This assignment focuses on building a real-time chat application using Socket.io, implementing bidirectional communication between clients and server.
-
-## Assignment Overview
-
-You will build a chat application with the following features:
-1. Real-time messaging using Socket.io
-2. User authentication and presence
-3. Multiple chat rooms or private messaging
-4. Real-time notifications
-5. Advanced features like typing indicators and read receipts
+This is a real-time chat application using Socket.io, implementing bidirectional communication between clients and server.
 
 ## Project Structure
 
@@ -36,20 +27,27 @@ socketio-chat/
 └── README.md               # Project documentation
 ```
 
-## Getting Started
-
-1. Accept the GitHub Classroom assignment invitation
-2. Clone your personal repository that was created by GitHub Classroom
-3. Follow the setup instructions in the `Week5-Assignment.md` file
-4. Complete the tasks outlined in the assignment
-
-## Files Included
-
-- `Week5-Assignment.md`: Detailed assignment instructions
-- Starter code for both client and server:
-  - Basic project structure
-  - Socket.io configuration templates
-  - Sample components for the chat interface
+## 🛠️ Setup
+1. Make sure you have Node.js installed (v18+ recommended)
+2. Clone the repository
+3. Install server dependencies:
+   ```
+   cd server
+   npm install
+   ```
+4. Install client dependencies:
+   ```
+   cd client
+   npm install
+   ```
+5. Start the development servers:
+   ```
+   # In the server directory
+   npm run dev
+   
+   # In the client directory
+   npm run dev
+   ```
 
 ## Requirements
 
@@ -58,16 +56,10 @@ socketio-chat/
 - Modern web browser
 - Basic understanding of React and Express
 
-## Submission
+## Screenshots
 
-Your work will be automatically submitted when you push to your GitHub Classroom repository. Make sure to:
-
-1. Complete both the client and server portions of the application
-2. Implement the core chat functionality
-3. Add at least 3 advanced features
-4. Document your setup process and features in the README.md
-5. Include screenshots or GIFs of your working application
-6. Optional: Deploy your application and add the URLs to your README.md
+![Landing Page ](client/src/assets/landing.PNG)
+![Landing Page ](client/src/assets/home.PNG)
 
 ## Resources
 
